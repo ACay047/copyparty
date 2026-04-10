@@ -228,6 +228,7 @@ if (1)
 		"cl_hpick": "tap on column headers to hide in the table below",
 		"cl_hcancel": "column hiding aborted",
 		"cl_rcm": "right-click menu",
+		"cl_gauto": "autogrid",
 
 		"ct_grid": '田 the grid',
 		"ct_ttips": '◔ ◡ ◔">ℹ️ tooltips',
@@ -282,6 +283,8 @@ if (1)
 		"tt_dynt": "autogrow as tree expands",
 		"tt_wrap": "word wrap",
 		"tt_hover": "reveal overflowing lines on hover$N( breaks scrolling unless mouse $N&nbsp; cursor is in the left gutter )",
+		"tt_gauto": "display as grid or list depending on folder contents",
+		"tt_gathr": "use grid if this percentage of files are pics/vids",
 
 		"ml_pmode": "at end of folder...",
 		"ml_btns": "cmds",
@@ -981,6 +984,13 @@ ebi('op_cfg').innerHTML = (
 	'		<a id="ireadme" class="tgl btn" href="#" tt="' + L.ct_readme + '</a>\n' +
 	'		<a id="idxh" class="tgl btn" href="#" tt="' + L.ct_idxh + '</a>\n' +
 	'		<a id="sbars" class="tgl btn" href="#" tt="' + L.ct_sbars + '</a>\n' +
+	'	</div>\n' +
+	'</div>\n' +
+	'<div>\n' +
+	'	<h3>' + L.cl_gauto + '</h3>\n' +
+	'	<div>\n' +
+	'		<a id="gauto" class="tgl btn" href="#" tt="' + L.tt_gauto + '">' + L.enable + '</a>\n' +
+	'		<input type="text" id="ga_thresh" value="" ' + NOAC + ' style="width:1.5em" tt="' + L.tt_gathr + '" />' +
 	'	</div>\n' +
 	'</div>\n' +
 	'<div>\n' +
@@ -5607,6 +5617,16 @@ var thegrid = (function () {
 			r.setvis();
 	};
 
+	r.autogrid = function (res) {
+		var ni = 0;
+		var nf = res.files.length;
+		for (var a = 0; a < nf; a++)
+			if (img_re.test('.' + res.files[a].ext))
+				ni++;
+		if (nf)
+			thegrid.en = 100 * ni / nf >= r.gathr;
+	};
+
 	function setln(v) {
 		if (v) {
 			r.ln += v;
@@ -5994,6 +6014,17 @@ var thegrid = (function () {
 		pbar.onresize();
 		vbar.onresize();
 	});
+	bcfg_bind(r, 'gaen', 'gauto', false, function(v) {
+		if (r.en && sread("griden") != 1) {
+			r.en = false;
+			r.setvis(true);
+		}
+	});
+	ebi('ga_thresh').value = r.gathr = icfg_get('ga_thresh', 70);
+	ebi('ga_thresh').oninput = function (e) {
+		var n = parseInt(this.value);
+		swrite('ga_thresh', r.gathr = (isNum(n) ? n : 0) || 70);
+	};
 	ebi('wtgrid').onclick = ebi('griden').onclick;
 
 	return r;
@@ -7705,6 +7736,9 @@ var treectl = (function () {
 				}
 			}
 		}
+
+		if (thegrid.gaen && sread('griden') != 1)
+			thegrid.autogrid(res);
 
 		if (url) setTimeout(asdf, 1); else asdf();
 	}
