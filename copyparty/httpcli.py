@@ -3828,6 +3828,14 @@ class HttpCli(object):
                     finally:
                         f.close()
 
+                    self.conn.nbyte += sz
+                    if not abspath:
+                        files.append(
+                            (sz, sha_hex, sha_b64, p_file or "(discarded)", fname, "")
+                        )
+                        tabspath = ""
+                        continue
+
                     if lim:
                         lim.nup(self.ip)
                         lim.bup(self.ip, sz)
@@ -3838,19 +3846,10 @@ class HttpCli(object):
                             lim.chk_bup(self.ip)
                             lim.chk_nup(self.ip)
                         except:
-                            if not nullwrite:
-                                wunlink(self.log, tabspath, vfs.flags)
-                                wunlink(self.log, abspath, vfs.flags)
+                            wunlink(self.log, tabspath, vfs.flags)
+                            wunlink(self.log, abspath, vfs.flags)
                             fname = os.devnull
                             raise
-
-                    self.conn.nbyte += sz
-                    if not abspath:
-                        files.append(
-                            (sz, sha_hex, sha_b64, p_file or "(discarded)", fname, "")
-                        )
-                        tabspath = ""
-                        continue
 
                     atomic_move(self.log, tabspath, abspath, vfs.flags)
                     tabspath = ""
