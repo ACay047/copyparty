@@ -216,6 +216,7 @@ def au_unpk(
 def ffprobe(
     abspath: str, timeout: int = 60
 ) -> tuple[dict[str, tuple[int, Any]], dict[str, list[Any]], list[Any], dict[str, Any]]:
+    # ffprobe -hide_banner -show_streams -show_format --
     cmd = [
         b"ffprobe",
         b"-hide_banner",
