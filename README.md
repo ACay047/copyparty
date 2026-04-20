@@ -2542,6 +2542,7 @@ buggy feature? rip it out  by setting any of the following environment variables
 | -------------------- | ------------ |
 | `PRTY_NO_CTYPES`     | do not use features from external libraries such as kernel32 |
 | `PRTY_NO_DB_LOCK`    | do not lock session/shares-databases for exclusive access |
+| `PRTY_NO_ENVEXPAND`  | do not expand environment-variables in configs and args |
 | `PRTY_NO_IFADDR`     | disable ip/nic discovery by poking into your OS with ctypes |
 | `PRTY_NO_IMPRESO`    | do not try to load js/css files using `importlib.resources` |
 | `PRTY_NO_IPV6`       | disable some ipv6 support (should not be necessary since windows 2000) |

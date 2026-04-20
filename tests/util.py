@@ -38,7 +38,7 @@ from copyparty.broker_thr import BrokerThr
 from copyparty.ico import Ico
 from copyparty.u2idx import U2idx
 from copyparty.up2k import Up2k
-from copyparty.util import FHC, CachedDict, Garda, Unrecv
+from copyparty.util import FHC, CachedDict, Garda, Unrecv, expand_osenv_c
 
 init_E(E)
 
@@ -195,6 +195,7 @@ class Cfg(Namespace):
             du_who="all",
             dk_salt="b" * 16,
             fk_salt="a" * 16,
+            env_expand=2,
             fsnt="lin",
             grp_all="acct",
             idp_gsep=re.compile("[|:;+,]"),
@@ -217,6 +218,7 @@ class Cfg(Namespace):
             rw_edit="md",
             s_rd_sz=256 * 1024,
             s_wr_sz=256 * 1024,
+            shenvexp=expand_osenv_c,
             shr_who="auth",
             sort="href",
             srch_hits=99999,

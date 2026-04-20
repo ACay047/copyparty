@@ -65,6 +65,10 @@ from .util import (
     b64enc,
     ctypes,
     dedent,
+    expand_osenv_c,
+    expand_osenv_cs,
+    expand_osenv_noop,
+    expand_osenv_s,
     has_resource,
     load_resource,
     min_ex,
@@ -427,9 +431,22 @@ def configure_ssl_ciphers(al: argparse.Namespace) -> None:
         sys.exit(0)
 
 
+def expand_cvars(argv) -> list[str]:
+    n = 0
+    for v in argv:
+        if "=" in v:
+            a, b = v.split("=", 1)
+            v = "%s=%s" % (a, os.path.expanduser(expand_osenv_c(b)))
+        else:
+            v = os.path.expanduser(expand_osenv_c(v))
+        argv[n] = v
+        n += 1
+    return argv
+
+
 def args_from_cfg(cfg_path: str) -> list[str]:
     lines: list[str] = []
-    expand_config_file(None, lines, cfg_path, "")
+    expand_config_file(None, expand_osenv_c, lines, cfg_path, "")
     lines = upgrade_cfg_fmt(None, argparse.Namespace(vc=False), lines, "")
 
     ret: list[str] = []
@@ -453,10 +470,12 @@ def args_from_cfg(cfg_path: str) -> list[str]:
             else:
                 ret.append(prefix + k + "=" + v)
 
-    return ret
+    return expand_cvars(ret)
 
 
 def expand_cfg(argv) -> list[str]:
+    argv = expand_cvars(argv)
+
     if CFG_DEF:
         supp = args_from_cfg(CFG_DEF[0])
         argv = argv[:1] + supp + argv[1:]
@@ -1197,6 +1216,7 @@ def add_general(ap, nc, srvname):
     ap2.add_argument("--name-url", metavar="TXT", type=u, help="URL for server name hyperlink (displayed topleft in browser)")
     ap2.add_argument("--name-html", type=u, help=argparse.SUPPRESS)
     ap2.add_argument("--site", metavar="URL", type=u, default="", help="public URL to assume when creating links; example: [\033[32mhttps://example.com/\033[0m]")
+    ap2.add_argument("--env-expand", metavar="N", type=int, default=-1, help="syntax to expect for environment-variables to expand in config-files; [\033[32m0\033[0m]=disable, [\033[32m1\033[0m]=$VAR (old syntax (scary)), [\033[32m2\033[0m]=${VAR} (new syntax (recommended))")
     ap2.add_argument("--mime", metavar="EXT=MIME", type=u, action="append", help="\033[34mREPEATABLE:\033[0m map file \033[33mEXT\033[0mension to \033[33mMIME\033[0mtype, for example [\033[32mjpg=image/jpeg\033[0m]")
     ap2.add_argument("--mimes", action="store_true", help="list default mimetype mapping and exit")
     ap2.add_argument("--rmagic", action="store_true", help="do expensive analysis to improve accuracy of returned mimetypes; will make file-downloads, rss, and webdav slower (volflag=rmagic)")
@@ -2178,6 +2198,15 @@ def main(argv: Optional[list[str]] = None) -> None:
         sys.exit(1)
 
     quotecheck(al)
+
+    if al.env_expand == 2:
+        al.shenvexp = expand_osenv_c
+    elif al.env_expand == 1:
+        al.shenvexp = expand_osenv_s
+    elif al.env_expand == 0:
+        al.shenvexp = expand_osenv_noop
+    else:
+        al.shenvexp = expand_osenv_cs
 
     if al.chdir:
         os.chdir(al.chdir)

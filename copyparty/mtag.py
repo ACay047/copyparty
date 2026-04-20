@@ -17,6 +17,7 @@ from .util import (
     FFMPEG_URL,
     REKOBO_LKEY,
     VF_CAREFUL,
+    expand_osenv_c,
     fsenc,
     gzip,
     min_ex,
@@ -86,7 +87,7 @@ class MParser(object):
 
         while True:
             try:
-                bp = os.path.expanduser(args)
+                bp = os.path.expanduser(expand_osenv_c(args))
                 if WINDOWS:
                     bp = uncyg(bp)
 
