@@ -29,7 +29,7 @@ RUN     apk add -U !pyc \
             libraw-dev py3-numpy-dev cython \
         && rm -f /usr/lib/python3*/EXTERNALLY-MANAGED \
         && python3 -m pip install pyvips \
-        && python3 -m pip install "$(wget -O- https://api.github.com/repos/letmaik/rawpy/releases/latest | awk -F\" '$2=="tarball_url"{print$4}')" \
+        && python3 -m pip install --no-binary rawpy rawpy \
         && bash install-deps.sh \
         && apk del py3-pip .bd \
         && chmod 777 /root \
