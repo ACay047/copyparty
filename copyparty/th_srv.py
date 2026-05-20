@@ -467,6 +467,11 @@ class ThumbSrv(object):
         zs = "th_dec th_no_webp th_no_jpg"
         for zs in zs.split(" "):
             ret.append("%s(%s)\n" % (zs, getattr(self.args, zs)))
+        zs = "th_spec_fl"
+        for zs in zs.split(" "):
+            v = getattr(self.args, zs)
+            if v:
+                ret.append("%s(%s)\n" % (zs, v))
         zs = "th_qv th_qvx thsize th_spec_p convt"
         for zs in zs.split(" "):
             ret.append("%s(%s)\n" % (zs, vn.flags.get(zs)))
@@ -1056,11 +1061,13 @@ class ThumbSrv(object):
             # fmt: on
             self._run_ff(cmd, vn, "convt")
 
+        fscale = ":fscale=log" if self.args.th_spec_fl else ""
+
         fc = "[0:a:0]aresample=48000{},showspectrumpic=s="
         if "3" in fmt:
-            fc += "1280x1024,crop=1420:1056:70:48[o]"
+            fc += "1280x1024%s,crop=1420:1056:70:48[o]" % fscale
         else:
-            fc += "640x512,crop=780:544:70:48[o]"
+            fc += "640x512%s,crop=780:544:70:48[o]" % fscale
 
         if self.args.th_ff_swr:
             fco = ":filter_size=128:cutoff=0.877"
