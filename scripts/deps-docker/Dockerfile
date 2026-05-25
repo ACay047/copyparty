@@ -156,6 +156,7 @@ COPY    uncomment.py unhint.py /z
 RUN     mv /z/mfusepy-3.1.1/mfusepy.py /z/dist/ \
         && cd /z/dist \
         && python3 /z/unhint.py \
+        && rm -f uh \
         && mv mfusepy.py f1 \
         && python3 /z/uncomment.py f1 \
         && sed -ri '/self.__critical_exception/d; /^from (typing|collections.abc) import/d' f1 \
