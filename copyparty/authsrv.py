@@ -627,6 +627,9 @@ class VFS(object):
                     t = "%s has no %s in %r => %r => %r"
                     self.log("vfs", t % (uname, msg, vpath, cvpath, ap), 6)
 
+                if not err:
+                    return None
+
                 t = "you don't have %s-access in %r or below %r"
                 raise Pebkac(err, t % (msg, "/" + cvpath, "/" + vn.vpath))
 
@@ -858,7 +861,7 @@ class VFS(object):
             for le in vfs_ls:
                 ap = absreal(os.path.join(fsroot, le[0]))
                 vn2 = self.chk_ap(ap)
-                if not vn2 or not vn2.get("", uname, True, False):
+                if not vn2 or not vn2.get("", uname, True, False, err=0):
                     rm1.append(le)
             _ = [vfs_ls.remove(x) for x in rm1]  # type: ignore
 
