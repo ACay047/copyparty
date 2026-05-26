@@ -17,7 +17,7 @@ RUN     apk add -U !pyc ${ADD_PKG} \
             vips-jxl vips-poppler vips-magick \
             libraw-tools \
         && rm -f /usr/lib/python3*/EXTERNALLY-MANAGED \
-        && python3 -m pip install pyvips
+        && python3 -m pip install pyvips --no-build-isolation
 
 COPY    i innvikler.sh ./
 RUN     ash innvikler.sh iv
