@@ -3037,7 +3037,7 @@ class Up2k(object):
             raise Pebkac(500, "too many xbu relocs, giving up")
 
         ptop = cj["ptop"]
-        if not self.register_vpath(ptop, cj["vcfg"]):
+        if not self.register_vpath(ptop, cj.pop("vcfg")):
             if ptop not in self.registry:
                 raise Pebkac(410, "location unavailable")
 
@@ -3372,7 +3372,6 @@ class Up2k(object):
                                     ud1 = (vfs.vpath, job["prel"], job["name"])
                                     pdir, _, job["name"], (vfs, rem) = x
                                     dst = os.path.join(pdir, job["name"])
-                                    job["vcfg"] = vfs.flags
                                     job["ptop"] = vfs.realpath
                                     job["vtop"] = vfs.vpath
                                     job["prel"] = rem
@@ -3380,6 +3379,7 @@ class Up2k(object):
                                     ud2 = (vfs.vpath, job["prel"], job["name"])
                                     if ud1 != ud2:
                                         # print(json.dumps(job, sort_keys=True, indent=4))
+                                        job["vcfg"] = vfs.flags
                                         job["hash"] = cj["hash"]
                                         self.log("xbu reloc1:%d..." % (depth,), 6)
                                         return self._handle_json(job, depth + 1)
@@ -5264,13 +5264,14 @@ class Up2k(object):
                 if x:
                     ud1 = (vfs.vpath, job["prel"], job["name"])
                     pdir, _, job["name"], (vfs, rem) = x
-                    job["vcfg"] = vf = vfs.flags
+                    vf = vfs.flags
                     job["ptop"] = vfs.realpath
                     job["vtop"] = vfs.vpath
                     job["prel"] = rem
                     job["name"] = sanitize_fn(job["name"])
                     ud2 = (vfs.vpath, job["prel"], job["name"])
                     if ud1 != ud2:
+                        job["vcfg"] = vf
                         self.log("xbu reloc2:%d..." % (depth,), 6)
                         return self._handle_json(job, depth + 1)
 
