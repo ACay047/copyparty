@@ -3281,7 +3281,10 @@ class Up2k(object):
                         vfs.lim.nup(cj["addr"])
                         vfs.lim.bup(cj["addr"], cj["size"])
 
-                    if "done" not in job:
+                    if "rvp0" in job and wark in reg:
+                        # xbu reloc; accept wrong path
+                        job["addr"] = cj["addr"]
+                    elif "done" not in job:
                         self.log("unfinished:\n  %r\n  %r" % (src, dst))
                         err = "partial upload exists at a different location; please resume uploading here instead:\n"
                         err += "/" + quotep(vsrc) + " "
@@ -3371,6 +3374,7 @@ class Up2k(object):
                                 x = pathmod(self.vfs, dst, vp, hr["reloc"])
                                 if x:
                                     ud1 = (vfs.vpath, job["prel"], job["name"])
+                                    job["rvp0"] = vjoins(*ud1)
                                     pdir, _, job["name"], (vfs, rem) = x
                                     dst = os.path.join(pdir, job["name"])
                                     job["ptop"] = vfs.realpath
@@ -3382,7 +3386,17 @@ class Up2k(object):
                                         # print(json.dumps(job, sort_keys=True, indent=4))
                                         job["vcfg"] = vfs.flags
                                         job["hash"] = cj["hash"]
-                                        self.log("xbu reloc1:%d..." % (depth,), 6)
+                                        t = "xbu reloc1=%d ptop=%r vtop=%r prel=%r name=%r"
+                                        t = t % (
+                                            depth,
+                                            job["ptop"],
+                                            job["vtop"],
+                                            job["prel"],
+                                            job["name"],
+                                        )
+                                        self.log(t, 6)
+                                        zs = djoin(job["ptop"], job["prel"])
+                                        bos.makedirs(zs, vf=vfs.flags)
                                         return self._handle_json(job, depth + 1)
 
                         job["name"] = self._untaken(pdir, job, now)
@@ -5264,6 +5278,7 @@ class Up2k(object):
                 x = pathmod(self.vfs, ap_chk, vp_chk, hr["reloc"])
                 if x:
                     ud1 = (vfs.vpath, job["prel"], job["name"])
+                    job["rvp0"] = vjoins(*ud1)
                     pdir, _, job["name"], (vfs, rem) = x
                     vf = vfs.flags
                     job["ptop"] = vfs.realpath
@@ -5273,7 +5288,15 @@ class Up2k(object):
                     ud2 = (vfs.vpath, job["prel"], job["name"])
                     if ud1 != ud2:
                         job["vcfg"] = vf
-                        self.log("xbu reloc2:%d..." % (depth,), 6)
+                        t = "xbu reloc2=%d ptop=%r vtop=%r prel=%r name=%r" % (
+                            depth,
+                            job["ptop"],
+                            job["vtop"],
+                            job["prel"],
+                            job["name"],
+                        )
+                        self.log(t, 6)
+                        bos.makedirs(djoin(job["ptop"], job["prel"]), vf=vf)
                         return self._handle_json(job, depth + 1)
 
         job["name"] = self._untaken(pdir, job, job["t0"])
